@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  myapp:
+    image: myapp:1
+    ports:
+      - "8080:5000"
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - FLASK_APP=main
+    secrets:
+      - postgres_password
+    configs:
+      - source: db_connection_script
+        target: /app/db_connect.sh
+    entrypoint: ["/bin/sh", "/app/db_connect.sh"]
+    command: ["flask", "run", "--host=0.0.0.0", "--port=5000"]
+
+  postgres:
+    image: postgres:15.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=myapp_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    restart: always
+
+volumes:
+  postgres_data:
+    driver: local
+
+secrets:
+  postgres_password:
+    file: ./postgres_password.txt
+
+configs:
+  db_connection_script:
+    content: |
+      #!/bin/sh
+      PASSWORD=$(cat /run/secrets/postgres_password)
+      export DATABASE_URL="postgresql://postgres:$PASSWORD@postgres:5432/myapp_db"
+      exec "$@"
