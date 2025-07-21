@@ -24,9 +24,6 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY app/main.py /app/
-COPY app/db_connect.sh /app/
-
-RUN chmod +x /app/db_connect.sh
 
 RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /app
 USER appuser
