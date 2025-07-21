@@ -1,5 +1,4 @@
 name: Build and Test
-
 on:
   push:
     branches: [ main ]
@@ -42,24 +41,25 @@ jobs:
           # Create a simple test file if none exists
           mkdir -p tests
           if [ ! -f tests/test_app.py ]; then
-            echo 'import pytest
-from app.main import app
+            cat > tests/test_app.py << EOF
+            import pytest
+            from app.main import app
 
-@pytest.fixture
-def client():
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
+            @pytest.fixture
+            def client():
+                app.config["TESTING"] = True
+                with app.test_client() as client:
+                    yield client
 
-def test_get_books(client):
-    response = client.get("/books")
-    assert response.status_code == 200
-    assert len(response.json) > 0
+            def test_get_books(client):
+                response = client.get("/books")
+                assert response.status_code == 200
+                assert len(response.json) > 0
 
-def test_get_book(client):
-    response = client.get("/books/1")
-    assert response.status_code == 200
-    assert "title" in response.json
-' > tests/test_app.py
+            def test_get_book(client):
+                response = client.get("/books/1")
+                assert response.status_code == 200
+                assert "title" in response.json
+          EOF
           fi
           pytest
