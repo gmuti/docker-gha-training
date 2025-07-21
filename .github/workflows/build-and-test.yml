@@ -28,6 +28,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest
           pip install -r requirements.txt
+          # Set PYTHONPATH for all subsequent steps
+          echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
       - name: Lint with flake8
         run: |
@@ -42,7 +44,7 @@ jobs:
           mkdir -p tests
           if [ ! -f tests/test_app.py ]; then
             cat > tests/test_app.py << EOF
-            import pytest
+          import pytest
             from app.main import app
 
             @pytest.fixture
@@ -62,4 +64,6 @@ jobs:
                 assert "title" in response.json
           EOF
           fi
+          # Make sure Python can find the app module
+          export PYTHONPATH=$(pwd)/app
           pytest
