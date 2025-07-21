@@ -39,32 +39,6 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Test with pytest
-        run: |
-          # Make sure Python can find the app module
+        run:  |
           export PYTHONPATH=$(pwd)
-
-          # Create a simple test file if none exists
-          mkdir -p tests
-          if [ ! -f tests/test_app.py ]; then
-            cat > tests/test_app.py << EOF
-import pytest
-from app.main import app
-
-@pytest.fixture
-def client():
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
-
-def test_get_books(client):
-    response = client.get("/books")
-    assert response.status_code == 200
-    assert len(response.json) > 0
-
-def test_get_book(client):
-    response = client.get("/books/1")
-    assert response.status_code == 200
-    assert "title" in response.json
-EOF
-          fi
           pytest
